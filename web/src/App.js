@@ -16,6 +16,8 @@ class App extends Component {
     availability: {},
     studentName: '',
     nameInputError: false,
+    todayError: false,
+    availabilityError: false,
   };
 
   componentDidMount() {
@@ -29,6 +31,7 @@ class App extends Component {
       const { today = null } = await res.json();
       this.setState({ today });
     } catch (e) {
+      this.setState({ todayError: true });
       console.error("Failed to fetch 'today' data", e);
     }
   };
@@ -39,6 +42,7 @@ class App extends Component {
       const { availability = {} } = await res.json();
       this.setState({ availability });
     } catch (e) {
+      this.setState({ availabilityError: true });
       console.error("Failed to fetch 'availability' data", e);
     }
   };
@@ -98,24 +102,38 @@ class App extends Component {
       availability = {},
       studentName = '',
       nameInputError = false,
+      availabilityError,
+      todayError,
     } = this.state;
 
     return (
       <div className="App container">
         <h1>Book Time with an Advisor</h1>
-        {today && <span id="today">Today is {today}.</span>}
+        {!todayError && today && <span id="today">Today is {today}.</span>}
+        {todayError && (
+          <h3 className="alert-danger">
+            An error occured while trying to get today's date. Please refresh
+            the page.
+          </h3>
+        )}
         <NameInput
           onChange={this.handleNameInputChange}
           error={nameInputError}
           value={studentName}
           scrollRef={this.inputRef}
         />
-        <AvailabilityTable
-          advisorAvailability={availability}
-          onClick={this.handleBookRequest}
-        />
-
-        <BookedTable bookedTimes={availability} />
+        {availabilityError && (
+          <h3 className="alert-danger">{`An error occured while trying to get the advisors' availability. Please refresh the page.`}</h3>
+        )}
+        {!availabilityError && (
+          <React.Fragment>
+            <AvailabilityTable
+              advisorAvailability={availability}
+              onClick={this.handleBookRequest}
+            />
+            <BookedTable bookedTimes={availability} />
+          </React.Fragment>
+        )}
       </div>
     );
   }
