@@ -34,6 +34,41 @@ class App extends Component {
     this.setState({ studentName: value });
   };
 
+  handleBookRequest = async (advisor, availability) => {
+    const { studentName = "" } = this.state;
+    if (studentName.length === 0) {
+      this.setState({ nameInputError: true });
+      return;
+    }
+    try {
+      const payload = {
+        studentName,
+        advisor,
+        availability
+      };
+      const bookResponse = await fetch(
+        "http://localhost:4433/book_appointment",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        }
+      );
+      const { data: updatedAvailability } = await bookResponse.json();
+      this.setState({
+        availability: updatedAvailability,
+        nameInputError: false
+      });
+    } catch (e) {
+      console.error(
+        "There was an error while trying to book an appointment",
+        e
+      );
+    }
+  };
+
   render() {
     const {
       today = null,
@@ -56,7 +91,7 @@ class App extends Component {
 
         <AvailabilityTable
           advisorAvailability={availability}
-          onClick={() => {}}
+          onClick={this.handleBookRequest}
         />
 
         <h2>Booked Times</h2>
