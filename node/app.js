@@ -39,6 +39,7 @@ const fetchThinkfulAvailabilityData = async () => {
                      and the student name of the booking
 */
 const formatThinkfulData = data =>
+  !!data &&
   Object.values(data).reduce((formattedData, availabilityObject) => {
     Object.entries(availabilityObject).forEach(([dateTime, advisor]) => {
       let advisorAvailabity = formattedData[advisor] || [];
@@ -54,15 +55,44 @@ const formatThinkfulData = data =>
     return formattedData;
   }, {});
 
+// Request Thinkful API data on server start
+// TODO: Poll the API for updated data and merge w/ cached data
+try {
+  new Promise(async () => {
+    const data = await fetchThinkfulAvailabilityData();
+    const formattedThinkfulData = formatThinkfulData(data) || {};
+    thinkfulAvailabilityData = formattedThinkfulData;
+  });
+} catch (e) {
+  console.error("There was an error while fetching the Thinkful API", e);
+}
+
+// responds with today's date and advisor availability
 app.get("/today", async (req, res) => {
-  const data = await fetchThinkfulAvailabilityData();
-  const formattedThinkfulData = formatThinkfulData(data);
   res.send({
     today: today(),
-    availability: formattedThinkfulData
+    availability: thinkfulAvailabilityData
   });
 });
 
+// responds with updated advisor availability data
+app.post("/book_appointment", (req, res) => {
+  const {
+    studentName,
+    advisor,
+    availability: requestedAvailability
+  } = req.body;
+  thinkfulAvailabilityData = {
+    ...thinkfulAvailabilityData,
+    [advisor]: (thinkfulAvailabilityData[advisor] || []).map(
+      timeslot =>
+        timeslot.availability === requestedAvailability && !timeslot.isBooked
+          ? { ...timeslot, isBooked: true, studentName }
+          : timeslot
+    )
+  };
+  res.send({ data: thinkfulAvailabilityData });
+});
 
 app.today = today;
 module.exports = app;

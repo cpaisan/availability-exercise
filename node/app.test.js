@@ -76,7 +76,7 @@ const formattedThinkfulData = {
   ]
 };
 
-describe("today", () => {
+describe("/today", () => {
   beforeEach(() => {
     nock("https://www.thinkful.com")
       .get("/api/advisors/availability")
@@ -89,9 +89,31 @@ describe("today", () => {
     expect(app.today()).toBe(new Date().toLocaleDateString());
   });
 
-  it("returns API data formatted", async () => {
+  it.skip("returns API data formatted", async () => {
+    // TODO: Figure out how to inject mock data into app memory
     const { body: responseData } = await request(app).get("/today");
     const { availability } = responseData;
     expect(availability).toEqual(formattedThinkfulData);
+  });
+});
+
+describe("/book_appointment", () => {
+  beforeEach(() => {
+    nock("https://www.thinkful.com")
+      .get("/api/advisors/availability")
+      .reply(200, {
+        ...thinkfulApiResponse
+      });
+  });
+  // TODO: Figure out how to inject mock data into app memory
+  it.skip("returns updated advisor availability", async () => {
+    const response = await request(app)
+      .post("/book_appointment")
+      .send({
+        studentName: "Foo Bar",
+        advisor: "319369",
+        availability: "2019-08-01T19:00:00-04:00"
+      })
+      .set("Accept", "application/json");
   });
 });
