@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const NameInput = ({ value, onChange, error }) => (
+const NameInput = ({ value, onChange, error, scrollRef }) => (
   <form id="name-form" className="col-md-6">
     <div className="form-group">
       <label htmlFor="name-field">Your Name</label>
@@ -11,6 +11,7 @@ const NameInput = ({ value, onChange, error }) => (
         className="form-control"
         value={value}
         onChange={onChange}
+        ref={scrollRef}
       />
       {error && (
         <span className="alert-danger">Your name cannot be empty.</span>
@@ -22,7 +23,8 @@ const NameInput = ({ value, onChange, error }) => (
 NameInput.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  error: PropTypes.bool.isRequired
+  error: PropTypes.bool.isRequired,
+  scrollRef: PropTypes.object,
 };
 
 export default NameInput;
