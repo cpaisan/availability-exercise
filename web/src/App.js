@@ -14,16 +14,27 @@ class App extends Component {
   };
 
   componentDidMount() {
-    this.fetchData();
+    this.fetchToday();
+    this.fetchAvailability();
   }
 
-  fetchData = async () => {
+  fetchToday = async () => {
     try {
       const res = await fetch("http://localhost:4433/today");
-      const { today = null, availability = {} } = await res.json();
-      this.setState({ today, availability });
+      const { today = null } = await res.json();
+      this.setState({ today });
     } catch (e) {
-      console.error("Failed to fetch 'today and availability' data", e);
+      console.error("Failed to fetch 'today' data", e);
+    }
+  };
+
+  fetchAvailability = async () => {
+    try {
+      const res = await fetch("http://localhost:4433/availability");
+      const { availability = {} } = await res.json();
+      this.setState({ availability });
+    } catch (e) {
+      console.error("Failed to fetch 'availability' data", e);
     }
   };
 
